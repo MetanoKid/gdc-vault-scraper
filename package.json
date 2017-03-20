@@ -8,5 +8,8 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/MetanoKid/gdc-vault-scraper/"
+	},
+	"dependencies": {
+		"request": "latest"
 	}
 }
