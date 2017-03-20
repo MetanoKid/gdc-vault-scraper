@@ -35,6 +35,8 @@ let cheerio = require("cheerio");
 // different ways to obtain the HTML data we will work with
 let HTMLGetters = {
 	"url": function(uri, onResponse) {
+		console.log("Querying '" + uri + "'...");
+		
 		request(uri, function(error, request, html) {
 			if(error) {
 				onResponse(undefined);
@@ -44,6 +46,8 @@ let HTMLGetters = {
 		});
 	},
 	"file": function(uri, onResponse) {
+		console.log("Reading file '" + uri + "'...");
+
 		fs.readFile(uri, "UTF-8", function(error, data) {
 			if(error) {
 				onResponse(undefined);
@@ -106,6 +110,7 @@ let writeProcessedData = function(dataAsString) {
 
 		// write contents to the file
 		fs.writeFileSync(outputFilePath, dataAsString);
+		console.log("Written contents in '" + outputFilePath + "'");
 	});
 };
 
