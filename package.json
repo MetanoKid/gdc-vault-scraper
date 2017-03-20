@@ -4,5 +4,9 @@
 	"description": "An utility to get a list of the links published at the GDC Vault",
 	"author": "MetanoKid",
 	"main": "src/GDCVaultScraper.js",
-	"license": "MIT"
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/MetanoKid/gdc-vault-scraper/"
+	}
 }
