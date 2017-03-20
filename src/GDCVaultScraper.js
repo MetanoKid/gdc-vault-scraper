@@ -4,12 +4,17 @@
 let configuration = {
 	userDefined: {
 		source: {
-			//type: "url",
-			//uri:  "http://www.gdcvault.com/browse/gdc-17"
-			type: "file",
-			uri:  "input/GDC Vault.html"
+			type: "url",
+			uri:  "http://www.gdcvault.com/browse/gdc-17"
+			/*type: "file",
+			uri:  "input/GDC Vault.html"*/
 		},
-		outputFile: "gdc_vault_links.txt"
+		output: {
+			/*type: "plain",
+			file: "gdc_vault_links.txt"*/
+			type: "json",
+			file: "gdc_vault_links.json"
+		}
 	},
 	internal: {
 		baseURL: "http//www.gdcvault.com",
@@ -26,6 +31,83 @@ let request = require("request");
 let fs      = require("fs");
 let mkdirp  = require("mkdirp");
 let cheerio = require("cheerio");
+
+// different ways to obtain the HTML data we will work with
+let HTMLGetters = {
+	"url": function(uri, onResponse) {
+		request(uri, function(error, request, html) {
+			if(error) {
+				onResponse(undefined);
+			}
+
+			onResponse(html);
+		});
+	},
+	"file": function(uri, onResponse) {
+		fs.readFile(uri, "UTF-8", function(error, data) {
+			if(error) {
+				onResponse(undefined);
+			}
+
+			onResponse(data);
+		});
+	}
+};
+
+// different ways to represent processed data as string
+let ToStringProcessors = {
+	json: function(data) {
+		return JSON.stringify(data, undefined, "\t");
+	},
+	plain: function(data) {
+		let output = "";
+
+		// per category
+		for(let category in data) {
+			output += "### " + category + "\n\n";
+
+			for(let title in data[category]) {
+				let entry = data[category][title];
+
+				output += entry.url + " " + title + "\n";
+			}
+
+			output += "\n";
+		}
+
+		return output;
+	}
+};
+
+// build a string to be written from the data we've processed
+let convertProcessedDataToString = function(data) {
+	let toString = ToStringProcessors[configuration.userDefined.output.type];
+
+	if(toString === undefined) {
+		console.log("Can't find output toString processor '" +
+			configuration.userDefined.output.type + "'. Defaulting to JSON");
+
+		return ToStringProcessors.json(data);
+	}
+
+	return toString(data)
+};
+
+// write the contents of the processed data into the configured file
+let writeProcessedData = function(dataAsString) {
+	let outputFilePath = configuration.internal.outputFolder + configuration.userDefined.output.file;
+	
+	// ensure the folder structure exists
+	mkdirp(configuration.internal.outputFolder, function(error) {
+		if(error) {
+			console.log("There was an error when creating directory '" + configuration.internal.outputFolder + "'");
+			return;
+		}
+
+		// write contents to the file
+		fs.writeFileSync(outputFilePath, dataAsString);
+	});
+};
 
 // extracts a members-only link from an "onclick" attribute
 let extractMembersOnlyLink = function(onclickCallback) {
@@ -111,49 +193,6 @@ let processHTML = function(html) {
 	});
 
 	return data;
-};
-
-// build a string to be written from the data we've processed
-let convertProcessedDataToString = function(data) {
-	return JSON.stringify(data, undefined, "\t");
-};
-
-// write the contents of the processed data into the configured file
-let writeProcessedData = function(dataAsString) {
-	let outputFilePath = configuration.internal.outputFolder + configuration.userDefined.outputFile;
-	
-	// ensure the folder structure exists
-	mkdirp(configuration.internal.outputFolder, function(error) {
-		if(error) {
-			console.log("There was an error when creating directory '" + configuration.internal.outputFolder + "'");
-			return;
-		}
-
-		// write contents to the file
-		fs.writeFileSync(outputFilePath, dataAsString);
-	});
-};
-
-// different ways to obtain the HTML data we will work with
-let HTMLGetters = {
-	"url": function(uri, onResponse) {
-		request(uri, function(error, request, html) {
-			if(error) {
-				onResponse(undefined);
-			}
-
-			onResponse(html);
-		});
-	},
-	"file": function(uri, onResponse) {
-		fs.readFile(uri, "UTF-8", function(error, data) {
-			if(error) {
-				onResponse(undefined);
-			}
-
-			onResponse(data);
-		});
-	}
 };
 
 // perform the full task
