@@ -2,4 +2,5 @@
 node_modules/
 
 # gdc-vault-scraper specific
+input/
 output/

@@ -4,8 +4,10 @@
 let configuration = {
 	"userDefined": {
 		"source": {
-			"type": "url",
-			"uri": "http://www.gdcvault.com/browse/gdc-17"
+			//"type": "url",
+			//"uri": "http://www.gdcvault.com/browse/gdc-17"
+			"type": "file",
+			"uri": "input/GDC Vault.html"
 		},
 		"outputFile": "gdc_vault_links.txt"
 	},
@@ -17,17 +19,21 @@ let configuration = {
 
 // external dependencies
 let request = require("request");
-let fs = require("fs");
-let mkdirp = require("mkdirp");
+let fs      = require("fs");
+let mkdirp  = require("mkdirp");
+let cheerio = require("cheerio");
 
 // process HTML data to obtain an object with all of the data we're interested in
 let processHTML = function(html) {
-	return {};
+	let $ = cheerio(html);
+	let data = {};
+
+	return data;
 };
 
 // build a string to be written from the data we've processed
 let convertProcessedDataToString = function(data) {
-	return "";
+	return JSON.stringify(data);
 };
 
 // write the contents of the processed data into the configured file
@@ -55,6 +61,15 @@ let HTMLGetters = {
 			}
 
 			onResponse(html);
+		});
+	},
+	"file": function(uri, onResponse) {
+		fs.readFile(uri, "UTF-8", function(error, data) {
+			if(error) {
+				onResponse(undefined);
+			}
+
+			onResponse(data);
 		});
 	}
 };

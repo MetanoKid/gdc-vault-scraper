@@ -11,7 +11,8 @@
 	},
 	"dependencies": {
 		"request": "latest",
-		"fs": "latest",
-		"mkdirp": "latest"
+		"fs":      "latest",
+		"mkdirp":  "latest",
+		"cheerio": "latest"
 	}
 }
