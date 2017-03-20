@@ -1,1 +1,5 @@
+# Node.js specific
 node_modules/
+
+# gdc-vault-scraper specific
+output/

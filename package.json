@@ -10,6 +10,8 @@
 		"url": "https://github.com/MetanoKid/gdc-vault-scraper/"
 	},
 	"dependencies": {
-		"request": "latest"
+		"request": "latest",
+		"fs": "latest",
+		"mkdirp": "latest"
 	}
 }
