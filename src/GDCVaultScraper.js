@@ -2,41 +2,26 @@
 
 // configuration
 let configuration = {
-	userDefined: {
-		source: {
-			type: "url",
-			uri:  "http://www.gdcvault.com/browse/gdc-17"
-			/*type: "file",
-			uri:  "input/GDC Vault.html"*/
-		},
-		output: {
-			/*type: "plain",
-			file: "gdc_vault_links.txt"*/
-			type: "json",
-			file: "gdc_vault_links.json"
-		}
-	},
-	internal: {
-		baseURL: "http//www.gdcvault.com",
-		outputFolder: "output/",
-		membersOnlyRegexes: {
-			vault:     /^loginPopup\(\'(.+)\'\); return false;$/,
-			sponsored: /^sponsorRegPopup\(\'\d+\',\'(\d+)\',\'\d+\'\)$/
-		}
+	baseURL: "http//www.gdcvault.com",
+	outputFolder: "output/",
+	membersOnlyRegexes: {
+		vault:     /^loginPopup\(\'(.+)\'\); return false;$/,
+		sponsored: /^sponsorRegPopup\(\'\d+\',\'(\d+)\',\'\d+\'\)$/
 	}
 };
 
 // external dependencies
-let request = require("request");
-let fs      = require("fs");
-let mkdirp  = require("mkdirp");
-let cheerio = require("cheerio");
+let userDefinedConfiguration = require("./configuration.js");
+let request                  = require("request");
+let fs                       = require("fs");
+let mkdirp                   = require("mkdirp");
+let cheerio                  = require("cheerio");
 
 // different ways to obtain the HTML data we will work with
 let HTMLGetters = {
 	"url": function(uri, onResponse) {
 		console.log("Querying '" + uri + "'...");
-		
+
 		request(uri, function(error, request, html) {
 			if(error) {
 				onResponse(undefined);
@@ -85,11 +70,11 @@ let ToStringProcessors = {
 
 // build a string to be written from the data we've processed
 let convertProcessedDataToString = function(data) {
-	let toString = ToStringProcessors[configuration.userDefined.output.type];
+	let toString = ToStringProcessors[userDefinedConfiguration.output.type];
 
 	if(toString === undefined) {
 		console.log("Can't find output toString processor '" +
-			configuration.userDefined.output.type + "'. Defaulting to JSON");
+			userDefinedConfiguration.output.type + "'. Defaulting to JSON");
 
 		return ToStringProcessors.json(data);
 	}
@@ -99,12 +84,12 @@ let convertProcessedDataToString = function(data) {
 
 // write the contents of the processed data into the configured file
 let writeProcessedData = function(dataAsString) {
-	let outputFilePath = configuration.internal.outputFolder + configuration.userDefined.output.file;
+	let outputFilePath = configuration.outputFolder + userDefinedConfiguration.output.file;
 	
 	// ensure the folder structure exists
-	mkdirp(configuration.internal.outputFolder, function(error) {
+	mkdirp(configuration.outputFolder, function(error) {
 		if(error) {
-			console.log("There was an error when creating directory '" + configuration.internal.outputFolder + "'");
+			console.log("There was an error when creating directory '" + configuration.outputFolder + "'");
 			return;
 		}
 
@@ -119,14 +104,14 @@ let extractMembersOnlyLink = function(onclickCallback) {
 	let matches = undefined;
 
 	// Vault's members
-	matches = onclickCallback.match(configuration.internal.membersOnlyRegexes.vault);
+	matches = onclickCallback.match(configuration.membersOnlyRegexes.vault);
 
 	if(matches !== null) {
 		return matches[1];
 	}
 
 	// Sponsored's members
-	matches = onclickCallback.match(configuration.internal.membersOnlyRegexes.sponsored);
+	matches = onclickCallback.match(configuration.membersOnlyRegexes.sponsored);
 
 	if(matches !== null) {
 		return matches[1];
@@ -192,7 +177,7 @@ let processHTML = function(html) {
 
 		// add entry
 		data[mediaType][mediaTitle] = {
-			url: configuration.internal.baseURL + link,
+			url: configuration.baseURL + link,
 			membersOnly: membersOnly
 		}
 	});
@@ -202,7 +187,7 @@ let processHTML = function(html) {
 
 // perform the full task
 (function() {
-	let htmlGetter = HTMLGetters[configuration.userDefined.source.type];
+	let htmlGetter = HTMLGetters[userDefinedConfiguration.input.type];
 
 	// ensure we've got a valid getter defined
 	if(htmlGetter === undefined) {
@@ -215,7 +200,7 @@ let processHTML = function(html) {
 	}
 
 	// obtain the data
-	htmlGetter(configuration.userDefined.source.uri, function(html) {
+	htmlGetter(userDefinedConfiguration.input.uri, function(html) {
 		// ensure we've got some
 		if(html === undefined) {
 			console.log("Failed to obtain HTML data from the configured source.");
