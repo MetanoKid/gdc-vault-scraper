@@ -88,6 +88,8 @@ let ToStringProcessors = {
 		output += separator + "Media type";
 		output += separator + "Category";
 		output += separator + "Title";
+		output += separator + "Speaker";
+		output += separator + "Company";
 		output += separator + "Link";
 		output += separator + "Free content";
 		output += "\n";
@@ -103,6 +105,8 @@ let ToStringProcessors = {
 						output += separator + mediaType;
 						output += separator + category;
 						output += separator + title;
+						output += separator + entry.speaker.name;
+						output += separator + entry.speaker.company;
 						output += separator + entry.url;
 						output += separator + (entry.membersOnly ? "No" : "Yes");
 						output += "\n";
@@ -201,6 +205,9 @@ let processHTML = function(html) {
 		let mediaTitle = $info.find("> strong").text().trim();
 		let conferenceName = $info.find(".conference_name").text().trim();
 		let category = $info.find(".track_name").text().trim();
+		let $speakerInfo = $($info.find("> span:not(.conference_name,.track_name)"));
+		let speaker = $speakerInfo.clone().children().remove().end().text().trim();
+		let company = $speakerInfo.find("> strong").text().trim().match(/^\((.+)\)$/)[1];
 
 		// attempt to find the link
 		let link = undefined;
@@ -241,7 +248,11 @@ let processHTML = function(html) {
 		// add entry
 		data[conferenceName][mediaType][category][mediaTitle] = {
 			url: configuration.baseURL + link,
-			membersOnly: membersOnly
+			membersOnly: membersOnly,
+			speaker: {
+				name: speaker,
+				company: company
+			}
 		}
 	});
 

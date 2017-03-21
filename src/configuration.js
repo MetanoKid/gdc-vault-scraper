@@ -6,11 +6,11 @@ module.exports = {
 		uri:  "input/GDC Vault.html"*/
 	},
 	output: {
-		type: "json",
-		file: "gdc_vault_links.json"
+		/*type: "json",
+		file: "gdc_vault_links.json"*/
 		/*type: "plain",
 		file: "gdc_vault_links.txt"*/
-		/*type: "csv",
-		file: "gdc_vault_links.csv"*/
+		type: "csv",
+		file: "gdc_vault_links.csv"
 	}
 };
