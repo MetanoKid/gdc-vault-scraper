@@ -2,7 +2,7 @@
 
 // configuration
 let configuration = {
-	baseURL: "http//www.gdcvault.com",
+	baseURL: "http://www.gdcvault.com",
 	outputFolder: "output/",
 	membersOnlyRegexes: {
 		vault:     /^loginPopup\(\'(.+)\'\); return false;$/,
@@ -116,14 +116,19 @@ let extractMembersOnlyLink = function(onclickCallback) {
 	matches = onclickCallback.match(configuration.membersOnlyRegexes.vault);
 
 	if(matches !== null) {
-		return matches[1];
+		return {
+			link: matches[1]
+		};
 	}
 
 	// Sponsored's members
 	matches = onclickCallback.match(configuration.membersOnlyRegexes.sponsored);
 
 	if(matches !== null) {
-		return matches[1];
+		return {
+			link: "/play/" + matches[1] + "/",
+			sponsored: true
+		};
 	}
 
 	return undefined;
@@ -164,10 +169,10 @@ let processHTML = function(html) {
 		let membersOnly = false;
 
 		if($entry.attr("onclick")) {
-			let membersOnlyLink = extractMembersOnlyLink($entry.attr("onclick"));
+			let membersOnlyData = extractMembersOnlyLink($entry.attr("onclick"));
 
-			if(membersOnlyLink !== undefined) {
-				link = membersOnlyLink;
+			if(membersOnlyData !== undefined) {
+				link = membersOnlyData.link;
 				membersOnly = true;
 			} else {
 				addToUnlinked(conferenceName, category, mediaType, mediaTitle);
