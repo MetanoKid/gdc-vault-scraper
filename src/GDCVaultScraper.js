@@ -7,7 +7,8 @@ let configuration = {
 	membersOnlyRegexes: {
 		vault:     /^loginPopup\(\'(.+)\'\); return false;$/,
 		sponsored: /^sponsorRegPopup\(\'\d+\',\'(\d+)\',\'\d+\'\)$/
-	}
+	},
+	csvSeparator: ";"
 };
 
 // external dependencies
@@ -45,9 +46,11 @@ let HTMLGetters = {
 
 // different ways to represent processed data as string
 let ToStringProcessors = {
+	// JSON output
 	json: function(data) {
 		return JSON.stringify(data, undefined, "\t");
 	},
+	// plain text output
 	plain: function(data) {
 		let output = "";
 
@@ -68,6 +71,41 @@ let ToStringProcessors = {
 						let entry = data[conference][mediaType][category][title];
 
 						output += entry.url + " " + title + "\n";
+					}
+				}
+			}
+		}
+
+		return output;
+	},
+	// CSV output
+	csv: function(data) {
+		let separator = configuration.csvSeparator;
+		let output = "";
+
+		// headers
+		output += "Conference";
+		output += separator + "Media type";
+		output += separator + "Category";
+		output += separator + "Title";
+		output += separator + "Link";
+		output += separator + "Free content";
+		output += "\n";
+
+		// dump data
+		for(let conference in data) {
+			for(let mediaType in data[conference]) {
+				for(let category in data[conference][mediaType]) {
+					for(let title in data[conference][mediaType][category]) {
+						let entry = data[conference][mediaType][category][title];
+
+						output += conference;
+						output += separator + mediaType;
+						output += separator + category;
+						output += separator + title;
+						output += separator + entry.url;
+						output += separator + (entry.membersOnly ? "No" : "Yes");
+						output += "\n";
 					}
 				}
 			}

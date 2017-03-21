@@ -10,5 +10,7 @@ module.exports = {
 		file: "gdc_vault_links.json"
 		/*type: "plain",
 		file: "gdc_vault_links.txt"*/
+		/*type: "csv",
+		file: "gdc_vault_links.csv"*/
 	}
 };
