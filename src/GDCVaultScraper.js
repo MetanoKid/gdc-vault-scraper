@@ -51,17 +51,26 @@ let ToStringProcessors = {
 	plain: function(data) {
 		let output = "";
 
-		// per category
-		for(let category in data) {
-			output += "### " + category + "\n\n";
+		// per conference
+		for(let conference in data) {
+			output += "### Conference: " + conference + "\n";
 
-			for(let title in data[category]) {
-				let entry = data[category][title];
+			// per media type
+			for(let mediaType in data[conference]) {
+				output += "\n## Media type: " + mediaType + "\n";
 
-				output += entry.url + " " + title + "\n";
+				// per category
+				for(let category in data[conference][mediaType]) {
+					output += "\n# Category: " + category + "\n\n";
+
+					// each resource
+					for(let title in data[conference][mediaType][category]) {
+						let entry = data[conference][mediaType][category][title];
+
+						output += entry.url + " " + title + "\n";
+					}
+				}
 			}
-
-			output += "\n";
 		}
 
 		return output;
@@ -126,13 +135,15 @@ let processHTML = function(html) {
 	let data = {};
 
 	// special entry for links we can't complete
-	data.unlinked = {};
-	let addToUnlinked = function(mediaType, mediaTitle) {
-		// ensure we've got the media type entry
-		data.unlinked[mediaType] = (data.unlinked[mediaType] || Array());
+	let addToUnlinked = function(conferenceName, category, mediaType, mediaTitle) {
+		// ensure we've got the path we need
+		data[conferenceName] = (data[conferenceName] || {});
+		data[conferenceName].unlinked = {};
+		data[conferenceName].unlinked[mediaType] = (data[conferenceName].unlinked[mediaType] || {});
+		data[conferenceName].unlinked[mediaType][category] = (data[conferenceName].unlinked[mediaType][category] || []);
 
 		// add unlinked title
-		data.unlinked[mediaType].push(mediaTitle);
+		data[conferenceName].unlinked[mediaType][category].push(mediaTitle);
 	};
 
 	// media entries in the DOM
@@ -141,9 +152,12 @@ let processHTML = function(html) {
 	// iterate over all entries
 	mediaEntries.each(function(index, entry) {
 		let $entry = $(entry);
+		let $info = $($entry.find(".conference_info > p"));
 
 		let mediaType = $entry.find(".media_type_image").attr("class").split(" ")[1];
-		let mediaTitle = $entry.find(".conference_info > p > strong").text();
+		let mediaTitle = $info.find("> strong").text().trim();
+		let conferenceName = $info.find(".conference_name").text().trim();
+		let category = $info.find(".track_name").text().trim();
 
 		// attempt to find the link
 		let link = undefined;
@@ -156,7 +170,7 @@ let processHTML = function(html) {
 				link = membersOnlyLink;
 				membersOnly = true;
 			} else {
-				addToUnlinked(mediaType, mediaTitle);
+				addToUnlinked(conferenceName, category, mediaType, mediaTitle);
 
 				// continue looping
 				return;
@@ -166,17 +180,23 @@ let processHTML = function(html) {
 		}
 
 		if(link === undefined) {
-			addToUnlinked(mediaType, mediaTitle);
+			addToUnlinked(conferenceName, category, mediaType, mediaTitle);
 
 			// continue looping
 			return;
 		}
 
+		// ensure we've got the conference
+		data[conferenceName] = (data[conferenceName] || {});
+
 		// ensure we've got the media type entry
-		data[mediaType] = (data[mediaType] || {});
+		data[conferenceName][mediaType] = (data[conferenceName][mediaType] || {});
+
+		// ensure we've got the category
+		data[conferenceName][mediaType][category] = (data[conferenceName][mediaType][category] || {});
 
 		// add entry
-		data[mediaType][mediaTitle] = {
+		data[conferenceName][mediaType][category][mediaTitle] = {
 			url: configuration.baseURL + link,
 			membersOnly: membersOnly
 		}
