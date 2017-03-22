@@ -11,7 +11,7 @@ Introducing **GDC Vault Scraper**.
   * Open a command line prompt in the folder.
   * Run `npm install` to have all of the dependencies for the project.
   * Update `src/configuration.js` to match the conference you want to extract links from.
-  * Run `node src/GDCVaultScraper.js`.
+  * Execute `gdc-vault-scraper.bat` if you're on Windows, `node src/GDCVaultScraper.js` otherwise.
 
 ## Configuring
 
