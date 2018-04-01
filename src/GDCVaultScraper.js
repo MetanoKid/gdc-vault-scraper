@@ -209,6 +209,9 @@ let processHTML = function(html) {
 		let speaker = $speakerInfo.clone().children().remove().end().text().trim();
 		let company = $speakerInfo.find("> strong").text().trim().match(/^\((.+)\)$/)[1];
 
+		// clean up some of the fields
+		mediaTitle = mediaTitle.replace(/['"]/g, "");
+
 		// attempt to find the link
 		let link = undefined;
 		let membersOnly = false;
