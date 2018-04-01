@@ -1,7 +1,7 @@
 module.exports = {
 	input: {
 		type: "url",
-		uri:  "http://www.gdcvault.com/browse/gdc-17"
+		uri:  "http://www.gdcvault.com/browse/gdc-18"
 		/*type: "file",
 		uri:  "input/GDC Vault.html"*/
 	},
