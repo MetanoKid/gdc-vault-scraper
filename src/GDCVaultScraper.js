@@ -2,7 +2,7 @@
 
 // configuration
 let configuration = {
-	baseURL: "http://www.gdcvault.com",
+	baseURL: "https://www.gdcvault.com",
 	outputFolder: "output/",
 	membersOnlyRegexes: {
 		vault:     /^loginPopup\(\'(.+)\'\); return false;$/,
@@ -159,7 +159,7 @@ let extractMembersOnlyLink = function(onclickCallback) {
 
 	if(matches !== null) {
 		return {
-			link: matches[1]
+			link: configuration.baseURL + matches[1]
 		};
 	}
 
@@ -168,7 +168,7 @@ let extractMembersOnlyLink = function(onclickCallback) {
 
 	if(matches !== null) {
 		return {
-			link: "/play/" + matches[1] + "/",
+			link: configuration.baseURL + "/play/" + matches[1] + "/",
 			sponsored: true
 		};
 	}
@@ -207,7 +207,8 @@ let processHTML = function(html) {
 		let category = $info.find(".track_name").text().trim();
 		let $speakerInfo = $($info.find("> span:not(.conference_name,.track_name)"));
 		let speaker = $speakerInfo.clone().children().remove().end().text().trim();
-		let company = $speakerInfo.find("> strong").text().trim().match(/^\((.+)\)$/)[1];
+		let extraSpeakerInfo = $speakerInfo.find("> strong").text().trim().match(/^\((.+)\)$/);
+		let company = extraSpeakerInfo !== null && extraSpeakerInfo[1];
 
 		// clean up some of the fields
 		mediaTitle = mediaTitle.replace(/['"]/g, "");
@@ -250,7 +251,7 @@ let processHTML = function(html) {
 
 		// add entry
 		data[conferenceName][mediaType][category][mediaTitle] = {
-			url: configuration.baseURL + link,
+			url: link,
 			membersOnly: membersOnly,
 			speaker: {
 				name: speaker,
